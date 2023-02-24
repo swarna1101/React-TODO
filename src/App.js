@@ -1,50 +1,82 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React from 'react'
+import './App.css';
+import ListItems from './ListItems';
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faTrash} from '@fortawesome/free-solid-svg-icons'
 
-import { addTaskAction } from "./actions";
-import List from "./List";
-
-import "./index.css";
-
-class App extends Component {
-  constructor() {
-    super();
+library.add(faTrash);
+class App extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {
-      task: "",
-    };
-    this.controlChange = this.controlChange.bind(this);
-    this.addTask = this.addTask.bind(this);
+        items: [],
+        currentItem:{
+          text:'',
+          key:'',
+      }
+    }
+    this.handleInput=this.handleInput.bind(this)
+    this.addItem=this.addItem.bind(this)
+    this.deleteItem=this.deleteItem.bind(this)
+    this.setUpdate=this.setUpdate.bind(this)
   }
-
-  controlChange(e) {
+  handleInput(e){
     this.setState({
-      task: e.target.value,
-    });
+      currentItem:{
+        text:e.target.value,
+        key:Date.now()
+      }
+    })
   }
-  addTask() {
-    if (this.state.task !== "") {
-      this.props.dispatch(addTaskAction(this.state.task));
-      console.log(this.props.dispatch);
+  addItem(e){
+    e.preventDefault();
+    const newItem=this.state.currentItem;
+    if(newItem.text!==""){
+      const newItems=[...this.state.items,newItem];
+      this.setState({
+        items:newItems,
+        currentItem:{
+          text:'',
+          key:''
+        }
+      })
     }
   }
-
+  deleteItem(key){
+    const filteredItems = this.state.items.filter(item => item.key!==key);
+    this.setState({
+      items:filteredItems
+    })
+  }
+  setUpdate(text,key){
+    const items= this.state.items;
+    items.map(item=>{
+      if(item.key===key){
+        item.text=text;
+      }
+      return console.log(item.key +"    "+key)
+    })
+    this.setState({
+      items:items
+    })
+  }
   render() {
     return (
-      <div>
-        <header>To-Do List</header>
-        <div className="input">
-          <input onChange={this.controlChange} placeholder="Enter Task" />
-          <button onClick={this.addTask}>Add Task</button>
-        </div>
-        <List />
+      <div className="App">
+        <header>
+        <form action="" id="to-do-form" onSubmit={this.addItem}>
+          <input type="text" placeholder="Enter Text" value={this.state.currentItem.text}
+          onChange={this.handleInput}/>
+          <button type="submit">Add</button>
+        </form>
+      </header>
+      <ListItems items={this.state.items}
+      deleteItem={this.deleteItem}
+      setUpdate={this.setUpdate}
+      />
       </div>
-    );
+      
+    )
   }
 }
-
-function mapStateToProps(state) {
-  return {
-    state,
-  };
-}
-export default connect(mapStateToProps)(App);
+export default App;
